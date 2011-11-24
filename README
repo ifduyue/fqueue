@@ -1,0 +1,4 @@
+A simple queue base on plain file
+
+multiple producers but only one consumer
+I don't know whether it is useful
