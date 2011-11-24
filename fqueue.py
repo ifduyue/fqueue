@@ -72,7 +72,6 @@ class Queue:
         
         
     def _w(self):
-        _lock(self.lockfp)
         self.fp = open(self._filepath, "a+b")
     
     def _save_offset(self):
@@ -88,9 +87,6 @@ class Queue:
             f.close()
         except:
             self.offset = 0
-    
-    def _process(self):
-        pass
     
     def get(self):
         if self.mode != 'r':
@@ -109,19 +105,25 @@ class Queue:
                 break
             if t == self.seporator: break
             s.append(t)
+        if not s:
+            return None
         s = ''.join(s)
         if self.fp is not None:
             self.offset = self.fp.tell()
             self._save_offset()
         try:
             return marshal.loads(s)
-        except: return None
+        except Exception, e:
+            return None
 
     def put(self, obj):
         if self.mode != 'w':
             raise FQueueException("cannot write in read mode")
+        _lock(self.lockfp)
+        self._w()
         self.fp.write(marshal.dumps(obj)+"\n")
         self.fp.write(self.seporator)
+        _unlock(self.lockfp)
             
     def close(self):
         if self.fp is not None:
