@@ -1,14 +1,18 @@
 import os
 import fcntl
+
 import marshal
 import struct
 
 __all__ = ['FQueueException', 'Queue']
-__version__ = 0.1
+__version__ = '0.0.1'
+__author__ = 'Elyes Du <lyxint@gmail.com>'
+__url__ = 'https://github.com/lyxint/fqueue'
+__license__ = 'Life is short, do whatever you like'
 
 class FQueueException(Exception): pass
 
-def _lock(fp, flags=fcntl.LOCK_EX):
+def _lock(fp):
     try:
         _lockdata = struct.pack('hhllhh', fcntl.F_WRLCK, 0, 0, 0, 0, 0)
         fcntl.fcntl(fp, fcntl.F_SETLKW, _lockdata)
@@ -24,7 +28,7 @@ def _unlock(fp):
 
 class Queue:
 
-    def __init__(self, filepath, mode, seporator="*****==TvT==*****\n"):
+    def __init__(self, filepath, mode, seporator="@@@@@(*^__^*)@@@@@\n"):
         '''init a queue
 
         filepath: path of file contains queue data
@@ -35,6 +39,8 @@ class Queue:
         self._filepath_offset = filepath + ".offset"
         self._filepath_lock = filepath + ".lock"
         self.seporator = seporator
+        if not seporator.endswith("\n"):
+            self.seporator += "\n"
         self.error = None
         if mode.lower() not in list('wr'):
             raise FQueueException("mode can only be 'w' or 'r'")
