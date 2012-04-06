@@ -28,7 +28,7 @@ def _unlock(fp):
 
 class Queue:
 
-    def __init__(self, filepath, mode, seporator="@@@@@(*^__^*)@@@@@\n"):
+    def __init__(self, filepath, mode, seporator=".(*^__^*)@(*^__^*)@(*^__^*).\n"):
         '''init a queue
 
         filepath: path of file contains queue data
@@ -37,7 +37,8 @@ class Queue:
         self._filepath = filepath
         self._filepath_process = filepath + ".process"
         self._filepath_offset = filepath + ".offset"
-        self._filepath_lock = filepath + ".lock"
+        self._filepath_wlock = filepath + ".r.lock"
+        self._filepath_rlock = filepath + ".w.lock"
         self.seporator = seporator
         if not seporator.endswith("\n"):
             self.seporator += "\n"
@@ -46,7 +47,8 @@ class Queue:
             raise FQueueException("mode can only be 'w' or 'r'")
         self.mode = mode.lower()
         self.offset = 0
-        self.lockfp = open(self._filepath_lock, "w")
+        self.wlockfp = open(self._filepath_wlock, "w")
+        self.rlockfp = open(self._filepath_rlock, "w")
         self.fp = None
         
         if mode == "r":
@@ -58,12 +60,15 @@ class Queue:
         if self.mode != "r": return False
         
         if os.access(self._filepath_process, os.F_OK):
+            _lock(self.rlockfp)
             self.fp = open(self._filepath_process, "rb")
             self._load_offset()
             self.fp.seek(self.offset)
-            return
+            _unlock(self.rlockfp)
+            return True
         
-        if not _lock(self.lockfp): return False
+        if not _lock(self.wlockfp): return False
+        _lock(self.rlockfp)
         try:
             os.rename(self._filepath, self._filepath_process)
             self.offset = 0
@@ -74,7 +79,8 @@ class Queue:
             self.error = e
             return False
         finally:
-            _unlock(self.lockfp)
+            _unlock(self.rlockfp)
+            _unlock(self.wlockfp)
         
         
     def _w(self):
@@ -100,6 +106,8 @@ class Queue:
         if self.fp is None and not self._r():
             return None
         s = []
+        _lock(self.rlockfp)
+        self._load_offset()
         while True:
             t = self.fp.readline()
             if not t:
@@ -111,12 +119,13 @@ class Queue:
                 break
             if t == self.seporator: break
             s.append(t)
-        if not s:
-            return None
-        s = ''.join(s)
         if self.fp is not None:
             self.offset = self.fp.tell()
             self._save_offset()
+        _unlock(self.rlockfp)
+        if not s:
+            return None
+        s = ''.join(s)
         try:
             return marshal.loads(s)
         except Exception, e:
@@ -125,19 +134,22 @@ class Queue:
     def put(self, obj):
         if self.mode != 'w':
             raise FQueueException("cannot write in read mode")
-        _lock(self.lockfp)
+        _lock(self.wlockfp)
         self._w()
         self.fp.write(marshal.dumps(obj)+"\n")
         self.fp.write(self.seporator)
-        _unlock(self.lockfp)
+        _unlock(self.wlockfp)
             
     def close(self):
         if self.fp is not None:
             self.fp.close()
             self.fp = None
-        if self.lockfp is not None:
-            self.lockfp.close()
-            self.lockfp = None
+        if self.wlockfp is not None:
+            self.wlockfp.close()
+            self.wlockfp = None
+        if self.rlockfp is not None:
+            self.rlockfp.close()
+            self.rlockfp = None
             
     
     
