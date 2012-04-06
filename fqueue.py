@@ -5,7 +5,7 @@ import marshal
 import struct
 
 __all__ = ['FQueueException', 'Queue']
-__version__ = '0.0.1'
+__version__ = '0.0.3'
 __author__ = 'Elyes Du <lyxint@gmail.com>'
 __url__ = 'https://github.com/lyxint/fqueue'
 __license__ = 'Life is short, do whatever you like'
