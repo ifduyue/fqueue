@@ -4,13 +4,11 @@ import fcntl
 import marshal
 import struct
 
-__all__ = ['FQueueException', 'Queue']
-__version__ = '0.0.4'
+__all__ = ['Queue']
+__version__ = '0.0.5'
 __author__ = 'Elyes Du <lyxint@gmail.com>'
 __url__ = 'https://github.com/lyxint/fqueue'
 __license__ = 'Life is short, do whatever you like'
-
-class FQueueException(Exception): pass
 
 def _lock(fp):
     try:
@@ -67,8 +65,6 @@ class Queue:
             return self.offset
     
     def get(self):
-        if self.mode != 'r':
-            raise FQueueException("cannot read in write mode")
         s = []
         try:
             _lock(self.rlockfp)
@@ -91,9 +87,7 @@ class Queue:
                 if not t:
                     self.fp.close()
                     self.fp = None
-                    try: # why?
-                        os.unlink(self._filepath_process)
-                    except: pass
+                    os.unlink(self._filepath_process)
                     self.offset = 0
                     self._save_offset()
                     break
@@ -111,7 +105,7 @@ class Queue:
                 return marshal.loads(s)
             except Exception, e:
                 return None
-        except OSError as e:
+        except Exception as e:
             return None
         finally:
             _unlock(self.rlockfp)
