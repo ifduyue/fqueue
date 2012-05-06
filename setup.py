@@ -8,8 +8,8 @@ setup(
     author = re.sub(r'\s+<.*', r'', fqueue.__author__),
     author_email = re.sub(r'(^.*<)|(>.*$)', r'', fqueue.__author__),
     url = fqueue.__url__,
-    description = ("A plain file queue service"),
-    long_description = fqueue.__doc__,
+    description = ("Plain file based queue service"),
+    long_description = file('README').read(),
     keywords = "queue",
     py_modules = [
         'fqueue',
