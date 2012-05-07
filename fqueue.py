@@ -37,9 +37,10 @@ class Queue:
         self._filepath_offset = filepath + ".offset"
         self._filepath_wlock = filepath + ".r.lock"
         self._filepath_rlock = filepath + ".w.lock"
-        self.seporator = seporator
+        seporator = seporator[:-1].replace("\n", "|") + seporator[-1]
         if not seporator.endswith("\n"):
-            self.seporator += "\n"
+            seporator += "\n"
+        self.seporator = seporator
         self.error = None
         self.mode = mode.lower()
         self.offset = 0

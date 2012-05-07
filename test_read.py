@@ -10,7 +10,7 @@ def sigint():
     signal.signal(signal.SIGINT, sig)
 
 def run(x=0):
-    q = Queue('test.queue', 'r')
+    q = Queue('test.queue')
     obj = q.get()
     if obj is not None:
         print obj

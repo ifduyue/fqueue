@@ -14,7 +14,7 @@ def randstr(l=10, chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012
     return ''.join(choice(chars) for i in xrange(l))
 
 def run(x=0):
-    q = Queue('test.queue', 'w')
+    q = Queue('test.queue')
     q.put({
         'x': x,
         's': randstr(10),
