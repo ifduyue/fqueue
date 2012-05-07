@@ -80,6 +80,9 @@ class Queue:
                     self.offset = 0
                     self._save_offset()
                     self.fp = open(self._filepath_process, "rb")
+                except:
+                    # queue is empty
+                    return None
                 finally:
                     _unlock(self.wlockfp)
             
