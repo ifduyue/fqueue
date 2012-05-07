@@ -5,7 +5,7 @@ import marshal
 import struct
 
 __all__ = ['Queue']
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 __author__ = 'Elyes Du <lyxint@gmail.com>'
 __url__ = 'https://github.com/lyxint/fqueue'
 __license__ = 'Life is short, do whatever you like'
